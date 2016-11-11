@@ -48,63 +48,27 @@ class N98_CheckoutFilters_Model_Adminhtml_Config_Observer
          * Then we create SimpleXMLElements for form init.
          */
         if ($section->tab == 'sales') {
-            if (in_array($section->label, array('Payment Methods', 'Shipping Methods'))) {
-                foreach ($section->groups as $group) {
-                    foreach ($group as $subGroup) {
-                        if (isset($subGroup->fields)) {
-                            $this->_addCustomergroupFieldToConfigGroup($subGroup);
+            if (in_array($section->getName(), array('carriers', 'payment', 'sagepaysuite'))) {
+                Mage::log($section->getName());
+                foreach ($section->groups[0] as $groupName => $group) {
+                    if (isset($group->fields)) {
+                        if ($groupName == 'account') {
+                            foreach ($group->fields[0] as $name => $fields) {
+                                $frontend_model = (string) $fields->frontend_model;
+                                if (substr($frontend_model, 0, 6) == 'paypal') {
+                                    $groupName = 'allPaypal';
+                                    continue;
+                                }
+                            }
+                        } elseif (substr($groupName, 0, 6) == 'paypal') {
+                            continue;
+                        }
+                        $this->_addCustomergroupFieldToConfigGroup($group->fields, $groupName);
+                        if (in_array($section->getName(), array('payment', 'sagepaysuite'))) {
+                            $this->_addMinYearFieldToConfigGroup($group->fields, $groupName);
                         }
                     }
                 }
-            }
-
-            // Add fields only for payment methods
-            if (in_array($section->label, array('Payment Methods'))) {
-                foreach ($section->groups as $group) {
-                    foreach ($group as $subGroup) {
-                        if (isset($subGroup->fields)) {
-                            $this->_addMinYearFieldToConfigGroup($subGroup);
-                        }
-                    }
-                }
-            }
-        }
-
-        /**
-         * Paypal uses a special config tab
-         */
-        if ($section->tab == 'sales' && $section->getName() == 'paypal') {
-            if (isset($section->groups->express)) {
-                $this->_addCustomergroupFieldToConfigGroup($section->groups->express);
-                $this->_addMinYearFieldToConfigGroup($section->groups->express);
-            }
-            if (isset($section->groups->wps)) {
-                $this->_addCustomergroupFieldToConfigGroup($section->groups->wps);
-                $this->_addMinYearFieldToConfigGroup($section->groups->wps);
-            }
-            if (isset($section->groups->wpp)) {
-                $this->_addCustomergroupFieldToConfigGroup($section->groups->wpp);
-                $this->_addMinYearFieldToConfigGroup($section->groups->wpp);
-            }
-        }
-
-        /**
-         * Ebizmarts_Sagepay uses a special config tab
-         */
-        if ('sales' == $section->tab && 'sagepaysuite' == $section->getName()) {
-            $my_groups = array(
-                'sagepayserver',
-                'sagepayserver_moto',
-                'sagepaydirectpro_moto',
-                'sagepaydirectpro',
-                'sagepayform',
-                'sagepaypaypal',
-                'sagepayrepeat'
-            );
-            foreach ($my_groups as $group) {
-                $this_group = $section->groups->{$group};
-                $this->_addCustomergroupFieldToConfigGroup($this_group);
-                $this->_addMinYearFieldToConfigGroup($this_group);
             }
         }
 
@@ -114,12 +78,12 @@ class N98_CheckoutFilters_Model_Adminhtml_Config_Observer
     /**
      * @param $subGroup
      */
-    protected function _addMinYearFieldToConfigGroup($subGroup)
+    protected function _addMinYearFieldToConfigGroup($fields, $config_path)
     {
         /**
          * Min age in years
          */
-        $minAge = $subGroup->fields->addChild('available_min_age');
+        $minAge = $fields->addChild('available_min_age');
         $minAge->addAttribute('translate', 'label');
         /* @var $customerGroup Mage_Core_Model_Config_Element */
         $minAge->addChild('label', 'Min age');
@@ -129,14 +93,15 @@ class N98_CheckoutFilters_Model_Adminhtml_Config_Observer
         $minAge->addChild('show_in_default', 1);
         $minAge->addChild('show_in_website', 1);
         $minAge->addChild('show_in_store', 1);
+        $minAge->addChild('config_path', 'n98_checkoutfilters/filters/'.$config_path.'/available_min_age');
     }
 
     /**
      * @param $subGroup
      */
-    protected function _addCustomergroupFieldToConfigGroup($subGroup)
+    protected function _addCustomergroupFieldToConfigGroup($fields, $config_path)
     {
-        $customerGroup = $subGroup->fields->addChild('available_for_customer_groups');
+        $customerGroup = $fields->addChild('available_for_customer_groups');
         $customerGroup->addAttribute('translate', 'label');
         /* @var $customerGroup Mage_Core_Model_Config_Element */
         $customerGroup->addChild('label', 'Customer Group');
@@ -146,5 +111,6 @@ class N98_CheckoutFilters_Model_Adminhtml_Config_Observer
         $customerGroup->addChild('show_in_default', 1);
         $customerGroup->addChild('show_in_website', 1);
         $customerGroup->addChild('show_in_store', 1);
+        $customerGroup->addChild('config_path', 'n98_checkoutfilters/filters/'.$config_path.'/available_for_customer_groups');
     }
 }

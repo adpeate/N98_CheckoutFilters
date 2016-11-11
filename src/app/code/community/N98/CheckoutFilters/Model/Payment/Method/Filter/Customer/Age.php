@@ -21,21 +21,21 @@
  * @package N98_CheckoutFilters
  */
 class N98_CheckoutFilters_Model_Payment_Method_Filter_Customer_Age
-    extends N98_CheckoutFilters_Model_Payment_Method_Filter_Abstract
+    extends N98_CheckoutFilters_Model_Payment_Method_Filter_Customer_Abstract
     implements N98_CheckoutFilters_Model_Payment_Method_Filter
 {
 
     /**
      * @var string
      */
-    const XML_MIN_AGE_CONFIG_FIELD = 'available_min_age';
+    const XML_FILTER_SUFFIX = '/available_min_age';
 
     /**
      * @return void
      */
     public function filter()
     {
-        $minAge = $this->_getMinAgeByPaymentMethod();
+        $minAge = $this->_getConfigData($this->getMethodInstance()->getCode());
 
         if (!empty($minAge)) {
             $customerDob = $this->getQuote()->getCustomerDob();
@@ -57,26 +57,9 @@ class N98_CheckoutFilters_Model_Payment_Method_Filter_Customer_Age
      *
      * @return int|null
      */
-    protected function _getMinAgeByPaymentMethod()
+    protected function _getConfigSuffix()
     {
-        switch ($this->getMethodInstance()->getCode()) {
-            case Mage_Paypal_Model_Config::METHOD_WPP_DIRECT:
-                $minAge = Mage::getStoreConfig('paypal/wpp/' . self::XML_MIN_AGE_CONFIG_FIELD);
-                break;
-
-            case Mage_Paypal_Model_Config::METHOD_WPP_EXPRESS:
-                $minAge = Mage::getStoreConfig('paypal/express/' . self::XML_MIN_AGE_CONFIG_FIELD);
-                break;
-
-            case Mage_Paypal_Model_Config::METHOD_WPS:
-                $minAge = Mage::getStoreConfig('paypal/wps/' . self::XML_MIN_AGE_CONFIG_FIELD);
-                break;
-
-            default:
-                $minAge = $this->getMethodInstance()->getConfigData(self::XML_MIN_AGE_CONFIG_FIELD);
-                break;
-        }
-        return $minAge;
+        return self::XML_FILTER_SUFFIX;
     }
 
     /**

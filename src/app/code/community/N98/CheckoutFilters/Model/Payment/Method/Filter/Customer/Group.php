@@ -7,13 +7,13 @@
  * To change this template use File | Settings | File Templates.
  */
 class N98_CheckoutFilters_Model_Payment_Method_Filter_Customer_Group
-    extends N98_CheckoutFilters_Model_Payment_Method_Filter_Abstract
+    extends N98_CheckoutFilters_Model_Payment_Method_Filter_Customer_Abstract
     implements N98_CheckoutFilters_Model_Payment_Method_Filter
 {
     /**
      * @var string
      */
-    const XML_CUSTOMER_GROUP_CONFIG_FIELD = 'available_for_customer_groups';
+    const XML_FILTER_SUFFIX = '/available_for_customer_groups';
 
     /**
      * @return void
@@ -25,20 +25,7 @@ class N98_CheckoutFilters_Model_Payment_Method_Filter_Customer_Group
 
         $paymentMethodInstance = $this->getMethodInstance();
 
-        /**
-         * Special handling for paypal
-         */
-        if ($paymentMethodInstance instanceof Mage_Paypal_Model_Standard) {
-            $customerGroupConfig = Mage::getStoreConfig('paypal/wps/' . self::XML_CUSTOMER_GROUP_CONFIG_FIELD);
-        } elseif ($paymentMethodInstance instanceof Mage_Paypal_Model_Express) {
-            $customerGroupConfig = Mage::getStoreConfig('paypal/express/' . self::XML_CUSTOMER_GROUP_CONFIG_FIELD);
-        } elseif ($paymentMethodInstance instanceof Mage_Paypal_Model_Direct) {
-            $customerGroupConfig = Mage::getStoreConfig('paypal/wpp/' . self::XML_CUSTOMER_GROUP_CONFIG_FIELD);
-        } elseif ($paymentMethodInstance instanceof Mage_GoogleCheckout_Model_Payment) {
-            $customerGroupConfig = Mage::getStoreConfig('google/checkout/' . self::XML_CUSTOMER_GROUP_CONFIG_FIELD);
-        } else {
-            $customerGroupConfig = $paymentMethodInstance->getConfigData(self::XML_CUSTOMER_GROUP_CONFIG_FIELD);
-        }
+        $customerGroupConfig = $this->_getConfigData($paymentMethodInstance->getCode());
 
         if (!empty($customerGroupConfig)) {
             $methodCustomerGroups = explode(',', $customerGroupConfig);
@@ -57,4 +44,10 @@ class N98_CheckoutFilters_Model_Payment_Method_Filter_Customer_Group
     {
         return Mage::helper('customer')->getCustomer();
     }
+
+    protected function _getConfigSuffix()
+    {
+        return self::XML_FILTER_SUFFIX;
+    }
+
 }

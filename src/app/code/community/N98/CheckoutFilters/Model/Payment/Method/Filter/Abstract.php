@@ -20,7 +20,7 @@
  * @category N98
  * @package N98_CheckoutFilters
  */
-class N98_CheckoutFilters_Model_Payment_Method_Filter_Abstract
+abstract class N98_CheckoutFilters_Model_Payment_Method_Filter_Abstract
 {
     /**
      * @var Mage_Sales_Model_Quote
@@ -91,4 +91,5 @@ class N98_CheckoutFilters_Model_Payment_Method_Filter_Abstract
     {
         return $this->_methodInstance;
     }
+
 }
