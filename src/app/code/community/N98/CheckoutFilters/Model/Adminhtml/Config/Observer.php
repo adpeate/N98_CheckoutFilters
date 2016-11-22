@@ -49,7 +49,6 @@ class N98_CheckoutFilters_Model_Adminhtml_Config_Observer
          */
         if ($section->tab == 'sales') {
             if (in_array($section->getName(), array('carriers', 'payment', 'sagepaysuite'))) {
-                Mage::log($section->getName());
                 foreach ($section->groups[0] as $groupName => $group) {
                     if (isset($group->fields)) {
                         if ($groupName == 'account') {
