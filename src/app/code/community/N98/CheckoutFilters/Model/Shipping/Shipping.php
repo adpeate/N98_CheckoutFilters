@@ -27,6 +27,7 @@ class N98_CheckoutFilters_Model_Shipping_Shipping
      * @var string
      */
     const XML_CUSTOMER_GROUP_CONFIG_FIELD = 'available_for_customer_groups';
+    const XML_FILTER_PREFIX = 'n98_checkoutfilters/filters/';
 
     /**
      * @param string $carrierCode
@@ -56,7 +57,7 @@ class N98_CheckoutFilters_Model_Shipping_Shipping
             $customer = Mage::helper('customer')->getCustomer();
         }
 
-        $carrierCustomerGroupConfig = Mage::getStoreConfig('carriers/' . $carrierCode . '/' . self::XML_CUSTOMER_GROUP_CONFIG_FIELD);
+        $carrierCustomerGroupConfig = Mage::getStoreConfig(self::XML_FILTER_PREFIX . '/' . $carrierCode . '/' . self::XML_CUSTOMER_GROUP_CONFIG_FIELD);
 
         if (!empty($carrierCustomerGroupConfig)) {
             $carrierCustomerGroups = explode(',', $carrierCustomerGroupConfig);
